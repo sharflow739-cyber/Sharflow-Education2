@@ -319,16 +319,16 @@
 
     /* sized for 13 rods instead of 17 */
     .frame{ min-width: 0; padding: 14px 10px; }
-    .rod-col{ width: 27px; height: 260px; }
-    .rods-wrap{ height: 260px; }
+    .rod-col{ width: 27px; height: 224px; }
+    .rods-wrap{ height: 224px; }
     .rod-line{ width: 3px; }
     .bead{ width: 27px; height: 19px; }
     .digit-cell{ width: 27px; font-size: 12px; }
     .frame-label{ font-size: 9px; letter-spacing: 2px; }
 
-    /* compact vertical spacing — less empty travel gap below the bar */
-    .bar{ top: 84px; height: 12px; }
-    .bar-dot{ top: 3px; }
+    /* compact vertical spacing — minimal empty travel gap below the bar */
+    .bar{ top: 54px; height: 10px; }
+    .bar-dot{ top: 1.5px; }
 
     .legend{ gap: 14px; font-size: 11px; }
     .footer-note{ font-size: 11px; }
@@ -402,7 +402,7 @@
     <div class="legend-item"><span class="swatch earth-sw"></span> Earth Bead (= 1)</div>
   </div>
 
-  <div class="footer-note">17 rods · tap any bead to slide it toward or away from the bar</div>
+  <div class="footer-note"><span id="rodCountText">17</span> rods · tap any bead to slide it toward or away from the bar</div>
   <div class="hint-note">Click a rod to select it (green glow) · ← → to move · 0–9 to set its value · R to reset</div>
 </div>
 
@@ -414,12 +414,13 @@ const barEl = document.getElementById('bar');
 const digitRow = document.getElementById('digitRow');
 const frameEl = document.getElementById('frameEl');
 
-const HEAVEN_INACTIVE = isMobile ? 6 : 8;
-const HEAVEN_ACTIVE = isMobile ? 64 : 114;
-const EARTH_ACTIVE = isMobile ? [100, 120, 140, 160] : [156, 182, 208, 234];
-const EARTH_INACTIVE = isMobile ? [176, 196, 216, 236] : [282, 308, 334, 358];
+const HEAVEN_INACTIVE = isMobile ? 4 : 8;
+const HEAVEN_ACTIVE = isMobile ? 33 : 114;
+const EARTH_ACTIVE = isMobile ? [66, 83, 100, 117] : [156, 182, 208, 234];
+const EARTH_INACTIVE = isMobile ? [145, 162, 179, 196] : [282, 308, 334, 358];
 
 const state = [];
+document.getElementById('rodCountText').textContent = RODS;
 const beadRefs = [];
 const colRefs = [];
 const digitLabels = [];
