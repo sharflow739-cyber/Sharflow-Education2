@@ -319,8 +319,8 @@
 
     /* sized for 13 rods instead of 17 */
     .frame{ min-width: 0; padding: 14px 10px; }
-    .rod-col{ width: 27px; height: 224px; }
-    .rods-wrap{ height: 224px; }
+    .rod-col{ width: 27px; height: 172px; }
+    .rods-wrap{ height: 172px; }
     .rod-line{ width: 3px; }
     .bead{ width: 27px; height: 19px; }
     .digit-cell{ width: 27px; font-size: 12px; }
@@ -417,7 +417,7 @@ const frameEl = document.getElementById('frameEl');
 const HEAVEN_INACTIVE = isMobile ? 4 : 8;
 const HEAVEN_ACTIVE = isMobile ? 33 : 114;
 const EARTH_ACTIVE = isMobile ? [66, 83, 100, 117] : [156, 182, 208, 234];
-const EARTH_INACTIVE = isMobile ? [145, 162, 179, 196] : [282, 308, 334, 358];
+const EARTH_INACTIVE = isMobile ? [92, 109, 126, 143] : [282, 308, 334, 358];
 
 const state = [];
 document.getElementById('rodCountText').textContent = RODS;
