@@ -293,6 +293,41 @@
     font-size:12px;
     margin-top: 4px;
   }
+
+  /* ===== MOBILE ONLY — laptop/desktop layout above is untouched ===== */
+  @media (max-width: 768px){
+    .page{ padding: 16px 10px 30px; }
+    .brand h1{ font-size: 21px; }
+    .brand h2{ font-size: 12px; }
+
+    .toolbar{ gap:6px; margin-bottom: 10px; }
+    .toolbar button{ padding: 7px 10px; font-size: 11px; }
+
+    .panels{ flex-direction: column; align-items: stretch; gap: 10px; }
+    .panel{ min-width: 0; width: 100%; }
+
+    .value-display{ font-size: 19px; }
+
+    /* keyboard shortcuts don't apply on touch devices */
+    .hint-note{ display: none; }
+
+    /* shrink the abacus itself so more rods fit without heavy scrolling */
+    .frame{ min-width: 0; padding: 14px 10px; }
+    .rod-col{ width: 30px; }
+    .rod-line{ width: 3px; }
+    .bead{ width: 30px; height: 19px; }
+    .digit-cell{ width: 30px; font-size: 12px; }
+    .frame-label{ font-size: 9px; letter-spacing: 2px; }
+
+    .legend{ gap: 14px; font-size: 11px; }
+    .footer-note{ font-size: 11px; }
+  }
+
+  @media (max-width: 420px){
+    .rod-col{ width: 25px; }
+    .bead{ width: 25px; height: 17px; }
+    .digit-cell{ width: 25px; font-size: 11px; }
+  }
 </style>
 </head>
 <body>
