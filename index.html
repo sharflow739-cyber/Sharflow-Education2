@@ -303,30 +303,36 @@
     .toolbar{ gap:6px; margin-bottom: 10px; }
     .toolbar button{ padding: 7px 10px; font-size: 11px; }
 
+    /* mobile only needs Reset + Show/Hide Value — sound stays always on */
+    #soundBtn, #slowBtn, #focusBtn, #zoomOutBtn, #zoomInBtn{ display: none; }
+
     .panels{ flex-direction: column; align-items: stretch; gap: 10px; }
     .panel{ min-width: 0; width: 100%; }
 
     .value-display{ font-size: 19px; }
 
-    /* keyboard shortcuts don't apply on touch devices */
+    /* keyboard shortcuts and rod-selection glow don't apply on touch devices */
     .hint-note{ display: none; }
+    .rod-col{ cursor: default; }
+    .rod-col.selected{ box-shadow: none; }
+    .rod-col.dimmed{ opacity: 1; }
 
-    /* shrink the abacus itself so more rods fit without heavy scrolling */
+    /* sized for 13 rods instead of 17 */
     .frame{ min-width: 0; padding: 14px 10px; }
-    .rod-col{ width: 30px; }
+    .rod-col{ width: 27px; }
     .rod-line{ width: 3px; }
-    .bead{ width: 30px; height: 19px; }
-    .digit-cell{ width: 30px; font-size: 12px; }
+    .bead{ width: 27px; height: 19px; }
+    .digit-cell{ width: 27px; font-size: 12px; }
     .frame-label{ font-size: 9px; letter-spacing: 2px; }
 
     .legend{ gap: 14px; font-size: 11px; }
     .footer-note{ font-size: 11px; }
   }
 
-  @media (max-width: 420px){
-    .rod-col{ width: 25px; }
-    .bead{ width: 25px; height: 17px; }
-    .digit-cell{ width: 25px; font-size: 11px; }
+  @media (max-width: 380px){
+    .rod-col{ width: 24px; }
+    .bead{ width: 24px; height: 17px; }
+    .digit-cell{ width: 24px; font-size: 11px; }
   }
 </style>
 </head>
@@ -343,8 +349,8 @@
     <button id="soundBtn" onclick="toggleSound()">🔊 Sound: On</button>
     <button id="slowBtn" onclick="toggleSlow()">🐢 Slow Motion: Off</button>
     <button id="focusBtn" onclick="toggleFocus()">🔎 Focus Mode: Off</button>
-    <button onclick="zoomOut()">➖ Zoom</button>
-    <button onclick="zoomIn()">➕ Zoom</button>
+    <button id="zoomOutBtn" onclick="zoomOut()">➖ Zoom</button>
+    <button id="zoomInBtn" onclick="zoomIn()">➕ Zoom</button>
   </div>
 
   <div class="panels">
@@ -396,7 +402,8 @@
 </div>
 
 <script>
-const RODS = 17;
+const isMobile = window.matchMedia('(max-width: 768px)').matches;
+const RODS = isMobile ? 13 : 17;
 const wrap = document.getElementById('rodsWrap');
 const barEl = document.getElementById('bar');
 const digitRow = document.getElementById('digitRow');
@@ -588,6 +595,7 @@ function toggleFocus(){
 }
 
 function selectRod(r){
+  if(isMobile){ selectedRod = r; return; }
   if(selectedRod !== null && colRefs[selectedRod]) colRefs[selectedRod].classList.remove('selected');
   selectedRod = r;
   colRefs[r].classList.add('selected');
