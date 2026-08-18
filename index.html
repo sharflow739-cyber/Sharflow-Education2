@@ -407,17 +407,22 @@
 </div>
 
 <script>
-const isMobile = window.matchMedia('(max-width: 768px)').matches;
-const RODS = isMobile ? 13 : 17;
+const mq = window.matchMedia('(max-width: 768px)');
+let isMobile = mq.matches;
+let RODS = isMobile ? 13 : 17;
 const wrap = document.getElementById('rodsWrap');
 const barEl = document.getElementById('bar');
 const digitRow = document.getElementById('digitRow');
 const frameEl = document.getElementById('frameEl');
 
-const HEAVEN_INACTIVE = isMobile ? 4 : 8;
-const HEAVEN_ACTIVE = isMobile ? 33 : 114;
-const EARTH_ACTIVE = isMobile ? [66, 83, 100, 117] : [156, 182, 208, 234];
-const EARTH_INACTIVE = isMobile ? [92, 109, 126, 143] : [282, 308, 334, 358];
+let HEAVEN_INACTIVE, HEAVEN_ACTIVE, EARTH_ACTIVE, EARTH_INACTIVE;
+function syncLayoutConstants(){
+  HEAVEN_INACTIVE = isMobile ? 4 : 8;
+  HEAVEN_ACTIVE = isMobile ? 33 : 114;
+  EARTH_ACTIVE = isMobile ? [66, 83, 100, 117] : [156, 182, 208, 234];
+  EARTH_INACTIVE = isMobile ? [92, 109, 126, 143] : [282, 308, 334, 358];
+}
+syncLayoutConstants();
 
 const state = [];
 document.getElementById('rodCountText').textContent = RODS;
@@ -490,19 +495,27 @@ function buildAbacus(){
     colRefs.push(col);
     beadRefs.push({heaven: hBead, earth: earthEls});
 
-    if(r % 3 === 1){
-      const colCenterPct = ((r + 0.5) / RODS) * 100;
-      const dot = document.createElement('div');
-      dot.className = 'bar-dot';
-      dot.style.left = colCenterPct + '%';
-      barEl.appendChild(dot);
-    }
-
     const label = document.createElement('div');
     label.className = 'digit-cell';
     label.textContent = '0';
     digitRow.appendChild(label);
     digitLabels.push(label);
+  }
+
+  placeBarDots();
+}
+
+function placeBarDots(){
+  barEl.querySelectorAll('.bar-dot').forEach(d => d.remove());
+  const barRect = barEl.getBoundingClientRect();
+  for(let r=0; r<RODS; r++){
+    if((RODS - 1 - r) % 3 !== 0) continue;
+    const colRect = colRefs[r].getBoundingClientRect();
+    const centerPx = (colRect.left + colRect.width / 2) - barRect.left;
+    const dot = document.createElement('div');
+    dot.className = 'bar-dot';
+    dot.style.left = centerPx + 'px';
+    barEl.appendChild(dot);
   }
 }
 
@@ -691,6 +704,21 @@ document.addEventListener('keydown', (e) => {
 });
 
 buildAbacus();
+window.addEventListener('resize', placeBarDots);
+window.addEventListener('orientationchange', () => setTimeout(placeBarDots, 100));
+
+mq.addEventListener('change', (e) => {
+  isMobile = e.matches;
+  RODS = isMobile ? 13 : 17;
+  syncLayoutConstants();
+  document.getElementById('rodCountText').textContent = RODS;
+  selectedRod = null;
+  focusMode = false;
+  document.getElementById('focusBtn').textContent = '🔎 Focus Mode: Off';
+  document.getElementById('focusBtn').classList.remove('active');
+  buildAbacus();
+  updateValue();
+});
 </script>
 </body>
 </html>
