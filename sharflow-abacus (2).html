@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sharflow Education — Abacus</title>
+<style>
+  :root{ --bead-speed: 0.15s; }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;
+    padding:0;
+    background:#faf7f2;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    color:#111827;
+  }
+  .page{
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px 16px 40px;
+  }
+  .brand{
+    text-align:center;
+    margin-bottom: 18px;
+  }
+  .brand h1{
+    margin:0;
+    font-size: 28px;
+    letter-spacing: 1px;
+    color:#111827;
+    font-weight:800;
+  }
+  .brand h2{
+    margin:6px 0 0;
+    font-size: 15px;
+    font-weight: 600;
+    color:#374151;
+    letter-spacing: 0.5px;
+  }
+
+  .toolbar{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    margin: 0 0 14px;
+    flex-wrap: wrap;
+  }
+  .toolbar button{
+    background:#111827;
+    color:#fff;
+    border:none;
+    padding:10px 18px;
+    border-radius:8px;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .toolbar button.active{
+    background:#b45309;
+  }
+  .toolbar button:active{ transform: translateY(1px); }
+
+  .panels{
+    display:flex;
+    justify-content:center;
+    gap:14px;
+    flex-wrap:wrap;
+    margin-bottom: 18px;
+  }
+  .panel{
+    background:#f3f4f6;
+    border:2px solid #111827;
+    border-radius:10px;
+    padding:12px 16px;
+    font-size:13px;
+    min-width: 230px;
+  }
+  .panel h3{
+    margin:0 0 8px;
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    color:#111827;
+  }
+  .panel-row{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    flex-wrap:wrap;
+  }
+  .panel input[type=text]{
+    flex:1;
+    min-width:100px;
+    padding:8px 10px;
+    border:2px solid #111827;
+    border-radius:6px;
+    font-size:14px;
+  }
+  .panel button{
+    background:#111827;
+    color:#fff;
+    border:none;
+    padding:8px 14px;
+    border-radius:6px;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .panel .feedback{
+    margin-top:8px;
+    font-weight:700;
+    font-size:14px;
+    min-height:18px;
+  }
+  .panel .target-num{
+    font-family:'Consolas', monospace;
+    font-size:20px;
+    font-weight:800;
+    letter-spacing:2px;
+    margin: 4px 0;
+  }
+  .panel .score{
+    font-size:12px;
+    color:#374151;
+  }
+
+  .value-display{
+    text-align:center;
+    font-size: 24px;
+    font-weight:800;
+    margin-bottom: 12px;
+    color:#111827;
+    letter-spacing: 2px;
+    font-family: 'Consolas', monospace;
+  }
+
+  .abacus-scroll{
+    overflow-x:auto;
+    overflow-y:visible;
+    padding: 10px 4px;
+  }
+  .zoom-pad{
+    transition: padding-bottom 0.2s ease;
+  }
+
+  /* OUTER WOOD FRAME */
+  .frame{
+    background: linear-gradient(180deg, #7a4a28, #4e2c14);
+    border-radius: 10px;
+    padding: 22px 22px;
+    min-width: 840px;
+    margin: 0 auto;
+    box-shadow: 0 12px 24px rgba(0,0,0,0.22);
+    border: 3px solid #3a2210;
+    transform-origin: top center;
+    transition: transform 0.2s ease;
+  }
+
+  .frame-label{
+    text-align:center;
+    color:#e9d5b8;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    font-weight:700;
+    opacity:0.85;
+  }
+
+  .rod-bed{
+    background: #e9d3ab;
+    border-radius: 4px;
+    padding: 8px 6px;
+    position: relative;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.25);
+  }
+
+  .rods-wrap{
+    position:relative;
+    display:flex;
+    justify-content:center;
+    height: 380px;
+  }
+  .rod-col{
+    position:relative;
+    width: 46px;
+    height: 380px;
+    border-radius: 6px;
+    transition: opacity 0.2s ease, box-shadow 0.2s ease;
+    cursor:pointer;
+  }
+  .rod-col.selected{
+    box-shadow: 0 0 0 3px #16a34a, 0 0 14px 2px rgba(22,163,74,0.6) inset;
+  }
+  .rod-col.dimmed{
+    opacity: 0.22;
+  }
+  .rod-line{
+    position:absolute;
+    top:2px;
+    bottom:2px;
+    width:4px;
+    left:50%;
+    transform:translateX(-50%);
+    background: linear-gradient(90deg, #1a0f08, #4a2c14, #1a0f08);
+    border-radius:2px;
+    z-index:1;
+  }
+
+  .bar{
+    position:absolute;
+    left:0;
+    right:0;
+    height: 16px;
+    top: 138px;
+    background: linear-gradient(180deg, #4e2c14, #2c1608);
+    z-index: 3;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.35), 0 -2px 4px rgba(0,0,0,0.2);
+  }
+  .bar-dot{
+    position:absolute;
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:#e9c27a;
+    top: 4.5px;
+    transform:translateX(-50%);
+    z-index:4;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.4);
+  }
+
+  .bead{
+    position:absolute;
+    left:50%;
+    width: 40px;
+    height: 24px;
+    transform: translateX(-50%);
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    cursor:pointer;
+    transition: top var(--bead-speed) ease;
+    z-index: 5;
+  }
+  .bead.heaven{
+    background: radial-gradient(circle at 35% 30%, #a85a3f, #6e2f1c 75%);
+    box-shadow: 0 2px 3px rgba(0,0,0,0.45), inset 0 1px 2px rgba(255,255,255,0.15);
+  }
+  .bead.earth{
+    background: radial-gradient(circle at 35% 30%, #e0b273, #a8763c 75%);
+    box-shadow: 0 2px 3px rgba(0,0,0,0.45), inset 0 1px 2px rgba(255,255,255,0.2);
+  }
+  .bead:hover{ filter: brightness(1.12); }
+
+  .digit-row{
+    display:flex;
+    justify-content:center;
+    margin-top: 6px;
+  }
+  .digit-cell{
+    width:46px;
+    text-align:center;
+    font-family:'Consolas', monospace;
+    font-weight:800;
+    font-size:15px;
+    color:#3a2210;
+  }
+
+  .legend{
+    display:flex;
+    justify-content:center;
+    gap: 26px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    color:#374151;
+  }
+  .legend-item{ display:flex; align-items:center; gap:8px; }
+  .swatch{ width:16px; height:16px; border-radius:3px; display:inline-block; }
+  .swatch.frame-sw{ background: linear-gradient(180deg, #7a4a28, #4e2c14); }
+  .swatch.bar-sw{ background: linear-gradient(180deg, #4e2c14, #2c1608); }
+  .swatch.heaven-sw{ background: radial-gradient(circle at 35% 30%, #a85a3f, #6e2f1c 75%); }
+  .swatch.earth-sw{ background: radial-gradient(circle at 35% 30%, #e0b273, #a8763c 75%); }
+
+  .footer-note{
+    text-align:center;
+    color:#9ca3af;
+    font-size:12px;
+    margin-top: 10px;
+  }
+  .hint-note{
+    text-align:center;
+    color:#6b7280;
+    font-size:12px;
+    margin-top: 4px;
+  }
+
+  /* ===== MOBILE ONLY — laptop/desktop layout above is untouched ===== */
+  @media (max-width: 768px){
+    .page{ padding: 16px 10px 30px; }
+    .brand h1{ font-size: 21px; }
+    .brand h2{ font-size: 12px; }
+
+    .toolbar{ gap:6px; margin-bottom: 10px; }
+    .toolbar button{ padding: 7px 10px; font-size: 11px; }
+
+    /* mobile only needs Reset + Show/Hide Value — sound stays always on */
+    #soundBtn, #slowBtn, #focusBtn, #zoomOutBtn, #zoomInBtn{ display: none; }
+
+    .panels{ flex-direction: column; align-items: stretch; gap: 10px; }
+    .panel{ min-width: 0; width: 100%; }
+
+    .value-display{ font-size: 19px; }
+
+    /* keyboard shortcuts and rod-selection glow don't apply on touch devices */
+    .hint-note{ display: none; }
+    .rod-col{ cursor: default; }
+    .rod-col.selected{ box-shadow: none; }
+    .rod-col.dimmed{ opacity: 1; }
+
+    /* sized for 13 rods instead of 17 */
+    .frame{ min-width: 0; padding: 14px 10px; }
+    .rod-col{ width: 27px; height: 172px; }
+    .rods-wrap{ height: 172px; }
+    .rod-line{ width: 3px; }
+    .bead{ width: 27px; height: 19px; }
+    .digit-cell{ width: 27px; font-size: 12px; }
+    .frame-label{ font-size: 9px; letter-spacing: 2px; }
+
+    /* compact vertical spacing — minimal empty travel gap below the bar */
+    .bar{ top: 54px; height: 10px; }
+    .bar-dot{ top: 1.5px; }
+
+    .legend{ gap: 14px; font-size: 11px; }
+    .footer-note{ font-size: 11px; }
+  }
+
+  @media (max-width: 380px){
+    .rod-col{ width: 24px; }
+    .bead{ width: 24px; height: 17px; }
+    .digit-cell{ width: 24px; font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="brand">
+    <h1>Sharflow Education</h1>
+    <h2>Abacus Parents Training Program</h2>
+  </div>
+
+  <div class="toolbar">
+    <button onclick="resetAbacus()">Reset</button>
+    <button id="valueBtn" onclick="toggleValue()">Show / Hide Value</button>
+    <button id="soundBtn" onclick="toggleSound()">🔊 Sound: On</button>
+    <button id="slowBtn" onclick="toggleSlow()">🐢 Slow Motion: Off</button>
+    <button id="focusBtn" onclick="toggleFocus()">🔎 Focus Mode: Off</button>
+    <button id="zoomOutBtn" onclick="zoomOut()">➖ Zoom</button>
+    <button id="zoomInBtn" onclick="zoomIn()">➕ Zoom</button>
+  </div>
+
+  <div class="panels">
+    <div class="panel">
+      <h3>Number Entry</h3>
+      <div class="panel-row">
+        <input type="text" id="numberInput" placeholder="e.g. 4205" maxlength="17" inputmode="numeric">
+        <button onclick="setNumberFromInput()">Set</button>
+      </div>
+      <div class="hint-note">Sets the abacus to show this number.</div>
+    </div>
+
+    <div class="panel">
+      <h3>Practice Mode</h3>
+      <div class="panel-row">
+        <button onclick="newQuestion()">New Question</button>
+        <button onclick="checkAnswer()">Check Answer</button>
+      </div>
+      <div class="target-num" id="practiceTarget">—</div>
+      <div class="feedback" id="practiceFeedback"></div>
+      <div class="score">Score: <span id="scoreDisplay">0 / 0</span></div>
+    </div>
+  </div>
+
+  <div class="value-display" id="valueDisplay" style="display:none;">0</div>
+
+  <div class="abacus-scroll">
+    <div class="zoom-pad" id="zoomPad">
+      <div class="frame" id="frameEl">
+        <div class="frame-label">Wooden Frame</div>
+        <div class="rod-bed">
+          <div class="bar" id="bar"></div>
+          <div class="rods-wrap" id="rodsWrap"></div>
+          <div class="digit-row" id="digitRow" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><span class="swatch frame-sw"></span> Frame</div>
+    <div class="legend-item"><span class="swatch bar-sw"></span> Reckoning Bar (divider)</div>
+    <div class="legend-item"><span class="swatch heaven-sw"></span> Heaven Bead (= 5)</div>
+    <div class="legend-item"><span class="swatch earth-sw"></span> Earth Bead (= 1)</div>
+  </div>
+
+  <div class="footer-note"><span id="rodCountText">17</span> rods · tap any bead to slide it toward or away from the bar</div>
+  <div class="hint-note">Click a rod to select it (green glow) · ← → to move · 0–9 to set its value · R to reset</div>
+</div>
+
+<script>
+const mq = window.matchMedia('(max-width: 768px)');
+let isMobile = mq.matches;
+let RODS = isMobile ? 13 : 17;
+const wrap = document.getElementById('rodsWrap');
+const barEl = document.getElementById('bar');
+const digitRow = document.getElementById('digitRow');
+const frameEl = document.getElementById('frameEl');
+
+let HEAVEN_INACTIVE, HEAVEN_ACTIVE, EARTH_ACTIVE, EARTH_INACTIVE;
+function syncLayoutConstants(){
+  HEAVEN_INACTIVE = isMobile ? 4 : 8;
+  HEAVEN_ACTIVE = isMobile ? 33 : 114;
+  EARTH_ACTIVE = isMobile ? [66, 83, 100, 117] : [156, 182, 208, 234];
+  EARTH_INACTIVE = isMobile ? [92, 109, 126, 143] : [282, 308, 334, 358];
+}
+syncLayoutConstants();
+
+const state = [];
+document.getElementById('rodCountText').textContent = RODS;
+const beadRefs = [];
+const colRefs = [];
+const digitLabels = [];
+
+let selectedRod = null;
+let soundOn = true;
+let slowMotion = false;
+let focusMode = false;
+let zoom = 1;
+let currentTarget = null;
+const score = {correct:0, total:0};
+
+let audioCtx = null;
+function playClick(){
+  if(!soundOn) return;
+  try{
+    if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = 'square';
+    o.frequency.value = 620;
+    g.gain.setValueAtTime(0.16, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.09);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start();
+    o.stop(audioCtx.currentTime + 0.09);
+  }catch(e){}
+}
+
+function buildAbacus(){
+  wrap.innerHTML = '';
+  digitRow.innerHTML = '';
+  barEl.querySelectorAll('.bar-dot').forEach(d => d.remove());
+  state.length = 0;
+  beadRefs.length = 0;
+  colRefs.length = 0;
+  digitLabels.length = 0;
+
+  for(let r=0; r<RODS; r++){
+    state.push({heaven:false, earth:[false,false,false,false]});
+
+    const col = document.createElement('div');
+    col.className = 'rod-col';
+    col.addEventListener('click', () => selectRod(r));
+
+    const rodLine = document.createElement('div');
+    rodLine.className = 'rod-line';
+    col.appendChild(rodLine);
+
+    const hBead = document.createElement('div');
+    hBead.className = 'bead heaven';
+    hBead.style.top = HEAVEN_INACTIVE + 'px';
+    hBead.onclick = (e) => { e.stopPropagation(); selectRod(r); toggleHeaven(r); };
+    col.appendChild(hBead);
+
+    const earthEls = [];
+    for(let b=0; b<4; b++){
+      const eBead = document.createElement('div');
+      eBead.className = 'bead earth';
+      eBead.style.top = EARTH_INACTIVE[b] + 'px';
+      eBead.onclick = (e) => { e.stopPropagation(); selectRod(r); toggleEarth(r, b); };
+      col.appendChild(eBead);
+      earthEls.push(eBead);
+    }
+
+    wrap.appendChild(col);
+    colRefs.push(col);
+    beadRefs.push({heaven: hBead, earth: earthEls});
+
+    const label = document.createElement('div');
+    label.className = 'digit-cell';
+    label.textContent = '0';
+    digitRow.appendChild(label);
+    digitLabels.push(label);
+  }
+
+  placeBarDots();
+}
+
+function placeBarDots(){
+  barEl.querySelectorAll('.bar-dot').forEach(d => d.remove());
+  const barRect = barEl.getBoundingClientRect();
+  for(let r=0; r<RODS; r++){
+    if((RODS - 1 - r) % 3 !== 0) continue;
+    const colRect = colRefs[r].getBoundingClientRect();
+    const centerPx = (colRect.left + colRect.width / 2) - barRect.left;
+    const dot = document.createElement('div');
+    dot.className = 'bar-dot';
+    dot.style.left = centerPx + 'px';
+    barEl.appendChild(dot);
+  }
+}
+
+function toggleHeaven(r){
+  const s = state[r];
+  s.heaven = !s.heaven;
+  beadRefs[r].heaven.style.top = (s.heaven ? HEAVEN_ACTIVE : HEAVEN_INACTIVE) + 'px';
+  playClick();
+  updateDigitLabel(r);
+  updateValue();
+}
+
+function toggleEarth(r, idx){
+  const s = state[r];
+  s.earth[idx] = !s.earth[idx];
+  beadRefs[r].earth[idx].style.top = (s.earth[idx] ? EARTH_ACTIVE[idx] : EARTH_INACTIVE[idx]) + 'px';
+  playClick();
+  updateDigitLabel(r);
+  updateValue();
+}
+
+function setRodValue(r, digit, playSound){
+  digit = Math.max(0, Math.min(9, digit));
+  const s = state[r];
+  s.heaven = digit >= 5;
+  const earthCount = digit % 5;
+  for(let b=0; b<4; b++){ s.earth[b] = b < earthCount; }
+  beadRefs[r].heaven.style.top = (s.heaven ? HEAVEN_ACTIVE : HEAVEN_INACTIVE) + 'px';
+  for(let b=0; b<4; b++){
+    beadRefs[r].earth[b].style.top = (s.earth[b] ? EARTH_ACTIVE[b] : EARTH_INACTIVE[b]) + 'px';
+  }
+  if(playSound) playClick();
+  updateDigitLabel(r);
+}
+
+function updateDigitLabel(r){
+  const s = state[r];
+  const v = (s.heaven ? 5 : 0) + s.earth.filter(Boolean).length;
+  digitLabels[r].textContent = v;
+}
+
+function resetAbacus(){
+  for(let r=0; r<RODS; r++){ setRodValue(r, 0, false); }
+  currentTarget = null;
+  document.getElementById('practiceTarget').textContent = '—';
+  document.getElementById('practiceFeedback').textContent = '';
+  updateValue();
+}
+
+function computeValue(){
+  let digits = [];
+  for(let r=0; r<RODS; r++){
+    const s = state[r];
+    let v = (s.heaven ? 5 : 0) + s.earth.filter(Boolean).length;
+    digits.push(v);
+  }
+  let str = digits.join('');
+  let stripped = str.replace(/^0+(?=\d)/, '');
+  return stripped;
+}
+
+function updateValue(){
+  const disp = document.getElementById('valueDisplay');
+  if(disp.style.display !== 'none'){
+    disp.textContent = computeValue();
+  }
+}
+
+function toggleValue(){
+  const disp = document.getElementById('valueDisplay');
+  const show = disp.style.display === 'none';
+  disp.style.display = show ? 'block' : 'none';
+  digitRow.style.display = show ? 'flex' : 'none';
+  if(show) updateValue();
+}
+
+function toggleSound(){
+  soundOn = !soundOn;
+  document.getElementById('soundBtn').textContent = soundOn ? '🔊 Sound: On' : '🔇 Sound: Off';
+  document.getElementById('soundBtn').classList.toggle('active', !soundOn);
+}
+
+function toggleSlow(){
+  slowMotion = !slowMotion;
+  document.documentElement.style.setProperty('--bead-speed', slowMotion ? '0.6s' : '0.15s');
+  document.getElementById('slowBtn').textContent = slowMotion ? '🐢 Slow Motion: On' : '🐢 Slow Motion: Off';
+  document.getElementById('slowBtn').classList.toggle('active', slowMotion);
+}
+
+function toggleFocus(){
+  focusMode = !focusMode;
+  document.getElementById('focusBtn').textContent = focusMode ? '🔎 Focus Mode: On' : '🔎 Focus Mode: Off';
+  document.getElementById('focusBtn').classList.toggle('active', focusMode);
+  if(focusMode && selectedRod === null) selectRod(0);
+  applyFocus();
+}
+
+function selectRod(r){
+  if(isMobile){ selectedRod = r; return; }
+  if(selectedRod !== null && colRefs[selectedRod]) colRefs[selectedRod].classList.remove('selected');
+  selectedRod = r;
+  colRefs[r].classList.add('selected');
+  colRefs[r].scrollIntoView({inline:'center', block:'nearest', behavior:'smooth'});
+  applyFocus();
+}
+
+function applyFocus(){
+  colRefs.forEach((col, r) => {
+    if(focusMode && r !== selectedRod){ col.classList.add('dimmed'); }
+    else { col.classList.remove('dimmed'); }
+  });
+}
+
+function applyZoomPadding(){
+  const pad = Math.max(0, (zoom - 1) * 460);
+  document.getElementById('zoomPad').style.paddingBottom = pad + 'px';
+}
+
+function zoomIn(){
+  zoom = Math.min(1.6, +(zoom + 0.1).toFixed(2));
+  frameEl.style.transform = 'scale(' + zoom + ')';
+  applyZoomPadding();
+}
+
+function zoomOut(){
+  zoom = Math.max(0.7, +(zoom - 0.1).toFixed(2));
+  frameEl.style.transform = 'scale(' + zoom + ')';
+  applyZoomPadding();
+}
+
+function setNumberFromInput(){
+  const input = document.getElementById('numberInput');
+  let val = input.value.replace(/[^0-9]/g, '');
+  if(val.length > RODS) val = val.slice(val.length - RODS);
+  const padded = val.padStart(RODS, '0');
+  for(let r=0; r<RODS; r++){
+    setRodValue(r, parseInt(padded[r], 10), false);
+  }
+  playClick();
+  updateValue();
+}
+
+function newQuestion(){
+  const digitCount = 2 + Math.floor(Math.random()*3); // 2 to 4 digit numbers
+  const min = Math.pow(10, digitCount-1);
+  const max = Math.pow(10, digitCount) - 1;
+  const target = Math.floor(min + Math.random()*(max-min+1));
+  currentTarget = target.toString();
+  document.getElementById('practiceTarget').textContent = currentTarget;
+  const fb = document.getElementById('practiceFeedback');
+  fb.textContent = '';
+}
+
+function checkAnswer(){
+  if(currentTarget === null) return;
+  const val = computeValue() || '0';
+  const target = currentTarget.replace(/^0+(?=\d)/, '') || '0';
+  const fb = document.getElementById('practiceFeedback');
+  if(val === target){
+    fb.textContent = '✅ Correct!';
+    fb.style.color = '#16a34a';
+    score.correct++;
+  } else {
+    fb.textContent = '❌ Not yet — your abacus shows ' + val;
+    fb.style.color = '#dc2626';
+  }
+  score.total++;
+  document.getElementById('scoreDisplay').textContent = score.correct + ' / ' + score.total;
+}
+
+document.addEventListener('keydown', (e) => {
+  if(selectedRod === null){
+    if(e.key === 'ArrowLeft' || e.key === 'ArrowRight'){ selectRod(0); }
+  }
+  if(e.key === 'ArrowLeft'){ selectRod(Math.max(0, selectedRod - 1)); e.preventDefault(); }
+  else if(e.key === 'ArrowRight'){ selectRod(Math.min(RODS-1, selectedRod + 1)); e.preventDefault(); }
+  else if(e.key >= '0' && e.key <= '9' && selectedRod !== null){
+    setRodValue(selectedRod, parseInt(e.key,10), true);
+    updateValue();
+  }
+  else if((e.key === 'r' || e.key === 'R')){ resetAbacus(); }
+  else if((e.key === 'Backspace' || e.key === 'Delete') && selectedRod !== null){
+    setRodValue(selectedRod, 0, true);
+    updateValue();
+  }
+});
+
+buildAbacus();
+window.addEventListener('resize', placeBarDots);
+window.addEventListener('orientationchange', () => setTimeout(placeBarDots, 100));
+
+mq.addEventListener('change', (e) => {
+  isMobile = e.matches;
+  RODS = isMobile ? 13 : 17;
+  syncLayoutConstants();
+  document.getElementById('rodCountText').textContent = RODS;
+  selectedRod = null;
+  focusMode = false;
+  document.getElementById('focusBtn').textContent = '🔎 Focus Mode: Off';
+  document.getElementById('focusBtn').classList.remove('active');
+  buildAbacus();
+  updateValue();
+});
+</script>
+</body>
+</html>
