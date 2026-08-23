@@ -509,7 +509,7 @@ function placeBarDots(){
   barEl.querySelectorAll('.bar-dot').forEach(d => d.remove());
   const barRect = barEl.getBoundingClientRect();
   for(let r=0; r<RODS; r++){
-    if(r % 3 !== 1) continue;
+    if(r % 3 !== 2) continue;
     const colRect = colRefs[r].getBoundingClientRect();
     const centerPx = (colRect.left + colRect.width / 2) - barRect.left;
     const dot = document.createElement('div');
