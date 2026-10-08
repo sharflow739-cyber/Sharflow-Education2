@@ -7,27 +7,38 @@
 <style>
 :root{--w1:#7a4a28;--w2:#4e2c14;--bed:#e9d3ab;--ink:#111827;--spd:.15s}
 *{box-sizing:border-box}
-body{margin:0;background:#faf7f2;color:var(--ink);font-family:'Segoe UI',Tahoma,'Noto Sans Bengali',sans-serif;touch-action:manipulation}
-.page{max-width:1100px;margin:auto;padding:14px 10px 40px}
-h1{margin:0;text-align:center;font-size:clamp(20px,5vw,28px);letter-spacing:1px}
-h2{margin:4px 0 0;text-align:center;font-size:clamp(12px,3vw,15px);color:#374151;font-weight:600}
-h3{margin:0 0 8px;font-size:14px;text-transform:uppercase;letter-spacing:1px}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0}
+body{background:#faf7f2;color:var(--ink);font-family:'Segoe UI',Tahoma,'Noto Sans Bengali',sans-serif;touch-action:manipulation}
+h1{margin:0;font-size:clamp(16px,4.5vw,24px);letter-spacing:1px}
+h2{margin:2px 0 0;font-size:clamp(10px,2.8vw,13px);color:#374151;font-weight:600}
 button,select,input{font:inherit}
-button{min-height:42px;background:#111827;color:#fff;border:0;border-radius:8px;padding:6px 12px;font-weight:600;cursor:pointer}
+button{min-height:36px;background:var(--ink);color:#fff;border:0;border-radius:8px;padding:4px 10px;font-weight:600;font-size:13px;cursor:pointer}
 button.on{background:#b45309}
 button:disabled{opacity:.4;cursor:not-allowed}
 :focus-visible{outline:3px solid #2563eb;outline-offset:2px}
-select,input[type=text]{min-height:42px;border:2px solid var(--ink);border-radius:6px;padding:4px 8px;background:#fff;max-width:100%}
-.tools{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:12px 0}
-.panel{background:#f3f4f6;border:2px solid var(--ink);border-radius:10px;padding:10px 12px;margin:10px 0}
-.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.msg{font-weight:700;font-size:14px;min-height:20px;margin-top:6px}
+select,input[type=text]{min-height:36px;border:2px solid var(--ink);border-radius:6px;padding:2px 6px;background:#fff;max-width:100%;font-size:13px}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.msg{font-weight:700;font-size:12px;min-height:16px}
 .err{color:#dc2626}.ok{color:#16a34a}
-#val{text-align:center;font:800 22px Consolas,monospace;letter-spacing:2px;margin:8px 0;word-break:break-all}
+/* ---------- one-screen layout ---------- */
+.page{height:100dvh;max-width:1250px;margin:auto;padding:8px 10px;display:flex;flex-direction:column;gap:6px;overflow:hidden}
+.top{flex:none;display:flex;justify-content:space-between;align-items:center;position:relative}
+.main{flex:1;min-height:0;display:flex;flex-direction:column;gap:6px}
+.left{flex:1;min-height:0;display:flex;flex-direction:column;gap:6px}
+.right{flex:none}
+@media(min-width:900px){.main{flex-direction:row;gap:12px}.left{flex:1 1 36%}.right{flex:1 1 64%;overflow:auto}}
+.panel{background:#f3f4f6;border:2px solid var(--ink);border-radius:10px;padding:8px}
+.practice select{flex:1 1 90px}
+.practice #bGen{flex:1 1 100%}
+@media(min-width:420px){.practice #bGen{flex:1 1 auto}}
+/* gear */
+#bGear{width:40px;font-size:20px;padding:0}
+#gearPanel{position:absolute;right:0;top:44px;z-index:50;background:#fff;border:2px solid var(--ink);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:6px;min-width:210px;box-shadow:0 8px 20px rgba(0,0,0,.25)}
+#gearPanel label{font-size:13px}
 /* abacus */
 #abacus{zoom:var(--z,1)}
-.frame{background:linear-gradient(180deg,var(--w1),var(--w2));border-radius:10px;padding:10px;border:3px solid #3a2210;box-shadow:0 10px 22px rgba(0,0,0,.22)}
-.flabel{text-align:center;color:#e9d5b8;font-size:10px;letter-spacing:3px;text-transform:uppercase;font-weight:700;margin-bottom:6px}
+.frame{background:linear-gradient(180deg,var(--w1),var(--w2));border-radius:10px;padding:8px;border:3px solid #3a2210;box-shadow:0 8px 18px rgba(0,0,0,.22)}
 .bed{background:var(--bed);border-radius:4px;padding:4px;overflow-x:auto;box-shadow:inset 0 2px 6px rgba(0,0,0,.25)}
 .rods{position:relative;display:flex;justify-content:center;height:282px}
 .rods::before{content:"";position:absolute;left:0;right:0;top:64px;height:12px;z-index:3;background:linear-gradient(#4e2c14,#2c1608);box-shadow:0 2px 4px rgba(0,0,0,.35)}
@@ -44,105 +55,92 @@ select,input[type=text]{min-height:42px;border:2px solid var(--ink);border-radiu
 .dg,.pv{position:absolute;left:0;right:0;text-align:center;font-family:Consolas,monospace;font-weight:800;color:#3a2210;display:none}
 .dg{bottom:14px;font-size:14px}.pv{bottom:0;font-size:9px}
 .showv .dg{display:block}.showpv .pv{display:block}
-.legend{display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:center;margin:10px 0;font-size:12px;color:#374151}
-.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-2px}
-/* gallery */
-#thumbs{display:flex;gap:6px;overflow-x:auto;margin-top:8px}
-#thumbs img{height:56px;border:2px solid #9ca3af;border-radius:6px;cursor:pointer;flex:none}
-#thumbs img.cur{border-color:#16a34a}
-#viewer{margin-top:8px}
-#vimg{height:42vh;min-height:120px;resize:vertical;overflow:hidden;background:#111;border-radius:8px;position:relative;touch-action:none;cursor:grab}
-#vi{position:absolute;left:50%;top:50%;max-width:100%;max-height:100%;transform-origin:center;user-select:none;-webkit-user-drag:none}
-.vt{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-/* sticky abacus on phones while solving */
-@media(max-width:768px){#abSec{position:sticky;top:0;z-index:20;background:#faf7f2;padding-bottom:4px}.hidemob{display:none}}
+.mini{margin-top:6px}
+.mini input{width:110px}
+#val{font:800 16px Consolas,monospace;letter-spacing:1px;word-break:break-all}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;justify-content:center;margin-top:6px;font-size:11px;color:#374151}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:4px;vertical-align:-2px}
+@media(max-width:768px){.hidemob,.legend{display:none!important}}
 /* worksheet */
-#sheet{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:10px}
-.sum{background:#fff;border:2px solid var(--ink);border-radius:8px;padding:8px;font-family:Consolas,monospace}
-.sum .n{display:grid;grid-template-columns:18px 1fr;font-size:18px;font-weight:700;text-align:right}
-.sum hr{border:0;border-top:2px solid var(--ink);margin:4px 0}
+#shSec{flex:1;min-height:0;display:flex;flex-direction:column;gap:6px}
+#sheet{flex:1;min-height:0;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px;align-content:start}
+.sum{background:#fff;border:2px solid var(--ink);border-radius:8px;padding:6px;font-family:Consolas,monospace}
+.sum .n{display:grid;grid-template-columns:16px 1fr;font-size:16px;font-weight:700;text-align:right}
+.sum hr{border:0;border-top:2px solid var(--ink);margin:3px 0}
 .sum input{width:100%;font-size:16px}
 .sum.good{border-color:#16a34a;background:#f0fdf4}.sum.bad{border-color:#dc2626;background:#fef2f2}
-.mk{font:700 13px 'Segoe UI',sans-serif;min-height:18px}
-.qno{font:700 11px 'Segoe UI',sans-serif;color:#6b7280}
-@media print{.noprint{display:none!important}body{background:#fff}.sum{break-inside:avoid}}
+.mk{font:700 12px 'Segoe UI',sans-serif;min-height:16px}
+.qno{font:700 10px 'Segoe UI',sans-serif;color:#6b7280}
+.hint{font-size:13px;color:#6b7280;padding:6px}
+@media print{.noprint{display:none!important}html,body,.page,.main,.left,#shSec,#sheet{height:auto!important;overflow:visible!important;display:block}#sheet{display:grid}.sum{break-inside:avoid}}
 </style>
 </head>
 <body>
 <div class="page">
-<div class="noprint">
-  <h1>Sharflow Education</h1>
-  <h2>Abacus Parents Training Program</h2>
-  <div class="tools" role="toolbar" aria-label="Controls">
-    <button id="bReset">Reset / রিসেট</button>
-    <button id="bVal" aria-pressed="false">Value / মান</button>
-    <button id="bPV" aria-pressed="false">Place / স্থানমান</button>
-    <button id="bSnd" aria-pressed="true">🔊 Sound / শব্দ</button>
-    <button id="bSlow" aria-pressed="false" class="hidemob">🐢 Slow / ধীর</button>
-    <button id="bFocus" aria-pressed="false" class="hidemob">🔎 Focus / ফোকাস</button>
-    <button id="bZo" class="hidemob" aria-label="Zoom out">➖ Zoom</button>
-    <button id="bZi" class="hidemob" aria-label="Zoom in">➕ Zoom</button>
-    <label>Rods / রড <select id="rodSel"><option value="auto">Auto</option><option>13</option><option>17</option><option>21</option></select></label>
-  </div>
-</div>
+  <header class="top noprint">
+    <div><h1>Sharflow Education</h1><h2>Abacus Parents Training Program</h2></div>
+    <button id="bGear" aria-haspopup="true" aria-expanded="false" aria-label="Settings / সেটিংস">⚙</button>
+    <div id="gearPanel" hidden role="group" aria-label="Settings">
+      <button id="bSnd" aria-pressed="true" class="hidemob">🔊 Sound / শব্দ</button>
+      <button id="bSlow" aria-pressed="false" class="hidemob">🐢 Slow / ধীর</button>
+      <button id="bFocus" aria-pressed="false" class="hidemob">🔎 Focus / ফোকাস</button>
+      <button id="bPV" aria-pressed="false">Place value / স্থানমান</button>
+      <div class="row hidemob"><button id="bZo" aria-label="Zoom out">➖ Zoom</button><button id="bZi" aria-label="Zoom in">➕ Zoom</button></div>
+      <label class="hidemob">Rods / রড <select id="rodSel"><option value="auto">Auto</option><option>13</option><option>17</option><option>21</option></select></label>
+    </div>
+  </header>
 
-<div id="abSec" class="noprint">
-  <div id="val" hidden>0</div>
-  <div id="abacus"><div class="frame"><div class="flabel">Wooden Frame</div><div class="bed"><div class="rods" id="rods"></div></div></div></div>
-  <div class="legend"><span><i style="background:#6b4423"></i>Frame / ফ্রেম</span><span><i style="background:#2c1608"></i>Bar / বার</span><span><i style="background:#6e2f1c"></i>Heaven = 5 / স্বর্গ</span><span><i style="background:#a8763c"></i>Earth = 1 / পৃথিবী</span><span><i style="background:#16a34a"></i>Unit rod / একক রড (tap dot)</span></div>
-  <button id="bCol" class="hidemob" style="display:none">▲ Hide abacus</button>
-</div>
+  <main class="main">
+    <section class="left">
+      <div class="panel practice noprint">
+        <div class="row">
+          <select id="pType" aria-label="Practice type"><option value="">1. Type / ধরন</option><option value="none">Without Complement</option><option value="five">5 Complement</option><option value="ten">10 Complement</option><option value="mix">Mix Complement</option></select>
+          <select id="pDig" aria-label="Digits" disabled><option value="">2. Digits / অঙ্ক</option><option>1</option><option>2</option><option>3</option><option>4</option></select>
+          <select id="pRows" aria-label="Rows" disabled><option value="">3. Rows / সারি</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>8</option><option>10</option></select>
+          <select id="pCnt" aria-label="Sums" disabled><option value="10">4. Sums / হিসাব</option><option>5</option><option>10</option><option>15</option><option>20</option></select>
+          <button id="bGen" disabled>Generate / তৈরি করুন</button>
+        </div>
+        <div class="msg" id="pMsg" role="status"></div>
+      </div>
+      <div id="hint" class="hint noprint">Pick options above and tap Generate. / উপরে অপশন বেছে "তৈরি করুন" চাপুন।</div>
+      <div id="shSec" hidden>
+        <div id="sheet"></div>
+        <div class="row noprint">
+          <button id="bChk">Check All / যাচাই</button>
+          <button id="bTry">Try again / আবার</button>
+          <button id="bNew">New / নতুন</button>
+          <button id="bPrint">Print / PDF</button>
+          <span class="msg" id="score" role="status"></span>
+        </div>
+      </div>
+    </section>
 
-<div class="panel noprint">
-  <h3>Number Entry / সংখ্যা বসান</h3>
-  <div class="row"><label for="numIn" class="ok" style="display:none"></label>
-  <input type="text" id="numIn" inputmode="decimal" placeholder="e.g. 4205" aria-label="Number / সংখ্যা" maxlength="22">
-  <button id="bSet">Set / সেট</button></div>
-  <div class="msg" id="numMsg" role="status"></div>
-</div>
-
-<div class="panel noprint">
-  <h3>Worksheet Images / ওয়ার্কশিট ছবি</h3>
-  <div class="row"><button id="bAdd" aria-label="Add images">＋ Add / যোগ করুন</button><input type="file" id="fIn" accept="image/*" multiple hidden></div>
-  <div id="thumbs"></div>
-  <div id="viewer" hidden>
-    <div id="vimg"><img id="vi" alt="Worksheet"></div>
-    <div class="vt"><button id="vP">◀</button><button id="vN">▶</button><button id="vZi">＋</button><button id="vZo">－</button><button id="vR">⟳ Rotate</button><button id="vF">⛶ Full</button><button id="vD">🗑 Delete</button><button id="vC">✕ Close</button></div>
-  </div>
-</div>
-
-<div class="panel noprint">
-  <h3>Practice / অনুশীলন</h3>
-  <div class="row">
-    <select id="pType" aria-label="Practice type"><option value="">1. Type / ধরন</option><option value="none">Without Complement</option><option value="five">5 Complement</option><option value="ten">10 Complement</option><option value="mix">Mix Complement</option></select>
-    <select id="pDig" aria-label="Digits" disabled><option value="">2. Digits / অঙ্ক</option><option>1</option><option>2</option><option>3</option><option>4</option></select>
-    <select id="pRows" aria-label="Rows" disabled><option value="">3. Rows / সারি</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>8</option><option>10</option></select>
-    <select id="pCnt" aria-label="Sums" disabled><option value="10">4. Sums / হিসাব (10)</option><option>5</option><option>10</option><option>15</option><option>20</option></select>
-    <button id="bGen" disabled>Generate Worksheet / তৈরি করুন</button>
-  </div>
-  <div class="msg" id="pMsg" role="status"></div>
-</div>
-
-<div id="shSec" hidden>
-  <div id="sheet"></div>
-  <div class="row noprint" style="margin-top:10px">
-    <button id="bChk">Check All / সব যাচাই</button>
-    <button id="bTry">Try again / আবার</button>
-    <button id="bNew">New Worksheet / নতুন</button>
-    <button id="bPrint">Print / PDF</button>
-    <span class="msg" id="score" role="status"></span>
-  </div>
-</div>
+    <section class="right noprint">
+      <div id="abacus"><div class="frame"><div class="bed"><div class="rods" id="rods"></div></div></div></div>
+      <div class="row mini">
+        <input type="text" id="numIn" inputmode="decimal" placeholder="4205" aria-label="Number / সংখ্যা" maxlength="22">
+        <button id="bSet">Set / সেট</button>
+        <button id="bReset">Reset / রিসেট</button>
+        <button id="bVal" aria-pressed="false">Value / মান</button>
+        <span id="val" hidden>0</span>
+      </div>
+      <div class="msg" id="numMsg" role="status"></div>
+      <div class="legend"><span><i style="background:#6b4423"></i>Frame / ফ্রেম</span><span><i style="background:#2c1608"></i>Bar / বার</span><span><i style="background:#6e2f1c"></i>Heaven = 5</span><span><i style="background:#a8763c"></i>Earth = 1</span><span><i style="background:#16a34a"></i>Unit rod / একক রড (tap dot)</span></div>
+    </section>
+  </main>
 </div>
 
 <script>
 /* ================= CONSTANTS ================= */
 const H_OFF=4,H_ON=42,E_ON=[78,98,118,138],E_OFF=[168,188,208,228];
-const MOBILE_BP=768,SIZES=[13,17,21],DB_NAME='sharflow',DB_STORE='imgs';
+const MOBILE_BP=768,MOBILE_ZOOM=.74;
 const $=id=>document.getElementById(id);
 
 /* ================= STATE ================= */
 let N=17,unit=8,st=[],sel=null,soundOn=true,zoom=1,manual=false,sheetData=[],sheetCfg=null;
+const isMob=()=>innerWidth<MOBILE_BP;
+const autoN=()=>isMob()?13:17;
+const defZoom=()=>isMob()?MOBILE_ZOOM:1;
 
 /* ================= SOUND (lazy, after user gesture) ================= */
 let ac=null;
@@ -158,7 +156,7 @@ function click(){
   }catch(e){}
 }
 
-/* ================= ABACUS RENDER ================= */
+/* ================= ABACUS ================= */
 function setN(n){
   N=n;unit=(n-1)/2;sel=null;
   st=Array.from({length:n},()=>({h:0,e:0}));
@@ -167,7 +165,7 @@ function setN(n){
 function build(){
   const c=(N-1)/2;let h='';
   for(let r=0;r<N;r++){
-    const dot=(((r-c)%3)+3)%3===0; // dots symmetric around centre rod, every 3rd rod
+    const dot=(((r-c)%3)+3)%3===0; // every 3rd rod, symmetric around centre rod
     h+=`<div class="rod${r===sel?' sel':''}" data-r="${r}"><i class="line"></i>`;
     if(dot)h+=`<b class="dot${r===unit?' unit':''}" role="button" aria-label="Set unit rod"></b>`;
     h+=`<span class="bead h" data-k="h"></span>`;
@@ -190,9 +188,8 @@ function draw(){
   }
   $('val').textContent=valueStr();
 }
-function digits(){return st.map(s=>5*s.h+s.e)}
 function valueStr(){
-  const d=digits();
+  const d=st.map(s=>5*s.h+s.e);
   const ip=d.slice(0,unit+1).join('').replace(/^0+(?=\d)/,'');
   const dp=d.slice(unit+1).join('').replace(/0+$/,'');
   return dp?ip+'.'+dp:ip;
@@ -200,7 +197,7 @@ function valueStr(){
 function tap(r,k){
   const s=st[r];
   if(k==='h')s.h^=1;
-  else{k=+k;s.e=k<s.e?k:k+1;} // tap moves that bead and all between it and the bar
+  else{k=+k;s.e=k<s.e?k:k+1;} // moves tapped bead and all beads between it and the bar
   click();draw();
 }
 function setRod(r,d){st[r].h=d>=5?1:0;st[r].e=d%5}
@@ -211,7 +208,7 @@ function select(r){
 }
 function resetAll(){st.forEach((s,i)=>setRod(i,0));draw()}
 
-/* single delegated listener (no per-bead listeners → no leaks) */
+/* one delegated listener: no per-bead listeners, no leaks, no touch+click doubles */
 $('rods').addEventListener('click',e=>{
   const rod=e.target.closest('.rod');if(!rod)return;
   const r=+rod.dataset.r;
@@ -221,25 +218,30 @@ $('rods').addEventListener('click',e=>{
   if(b)tap(r,b.dataset.k);
 });
 
-/* ================= TOOLBAR ================= */
+/* ================= SETTINGS + SMALL CONTROLS ================= */
 function toggle(btn,fn){btn.addEventListener('click',()=>{const on=btn.getAttribute('aria-pressed')!=='true';btn.setAttribute('aria-pressed',on);btn.classList.toggle('on',on);fn(on)})}
+const gear=$('bGear'),gp=$('gearPanel');
+const closeGear=()=>{gp.hidden=true;gear.setAttribute('aria-expanded','false')};
+gear.addEventListener('click',e=>{e.stopPropagation();const open=gp.hidden;gp.hidden=!open;gear.setAttribute('aria-expanded',open)});
+document.addEventListener('click',e=>{if(!gp.hidden&&!gp.contains(e.target))closeGear()});
+
 $('bReset').onclick=resetAll;
 toggle($('bVal'),on=>{$('val').hidden=!on;$('rods').classList.toggle('showv',on)});
 toggle($('bPV'),on=>$('rods').classList.toggle('showpv',on));
 $('bSnd').classList.add('on');
 $('bSnd').addEventListener('click',()=>{soundOn=!soundOn;$('bSnd').setAttribute('aria-pressed',soundOn);$('bSnd').classList.toggle('on',soundOn)});
 toggle($('bSlow'),on=>document.documentElement.style.setProperty('--spd',on?'.6s':'.15s'));
-toggle($('bFocus'),on=>{$('rods').classList.toggle('focus',on);if(on&&sel===null){select(unit)}});
-function setZoom(z){zoom=Math.max(.7,Math.min(1.6,+z.toFixed(2)));$('abacus').style.setProperty('--z',zoom)}
+toggle($('bFocus'),on=>{$('rods').classList.toggle('focus',on);if(on&&sel===null)select(unit)});
+function setZoom(z){zoom=Math.max(.5,Math.min(1.6,+z.toFixed(2)));$('abacus').style.setProperty('--z',zoom)}
 $('bZi').onclick=()=>setZoom(zoom+.1);$('bZo').onclick=()=>setZoom(zoom-.1);
 $('rodSel').onchange=e=>{manual=e.target.value!=='auto';setN(manual?+e.target.value:autoN())};
-const autoN=()=>innerWidth<MOBILE_BP?13:17;
 let rt;
-function onResize(){clearTimeout(rt);rt=setTimeout(()=>{if(!manual&&autoN()!==N)setN(autoN())},150)}
+function onResize(){clearTimeout(rt);rt=setTimeout(()=>{if(!manual&&autoN()!==N){setN(autoN());setZoom(defZoom())}},150)}
 addEventListener('resize',onResize);addEventListener('orientationchange',onResize);
 
-/* keyboard (ignored while typing) */
+/* keyboard (ignored while typing in a field) */
 addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeGear();return}
   if(/^(INPUT|SELECT|TEXTAREA|BUTTON)$/.test(e.target.tagName)||e.ctrlKey||e.metaKey||e.altKey)return;
   if(e.key==='ArrowLeft'||e.key==='ArrowRight'){
     select(sel===null?unit:Math.max(0,Math.min(N-1,sel+(e.key==='ArrowLeft'?-1:1))));e.preventDefault();
@@ -254,7 +256,7 @@ $('bSet').onclick=()=>{
   const s=$('numIn').value.trim(),m=$('numMsg');
   if(!s)return say(m,'Enter a number / সংখ্যা লিখুন');
   if(s[0]==='-')return say(m,'Negative not allowed / ঋণাত্মক নয়');
-  if(!/^\d+(\.\d+)?$/.test(s))return say(m,'Digits only (e.g. 4205 or 12.5) / শুধু অঙ্ক');
+  if(!/^\d+(\.\d+)?$/.test(s))return say(m,'Digits only, e.g. 4205 or 12.5 / শুধু অঙ্ক');
   const [ip0,dp='']=s.split('.'),ip=ip0.replace(/^0+(?=\d)/,'');
   if(ip.length>unit+1||dp.length>N-1-unit)return say(m,'Too big for this unit rod / এই একক রডে ধরবে না');
   st.forEach((x,i)=>setRod(i,0));
@@ -265,7 +267,7 @@ $('bSet').onclick=()=>{
 $('numIn').addEventListener('keydown',e=>{if(e.key==='Enter')$('bSet').click()});
 
 /* ================= PRACTICE GENERATOR ================= */
-/* classify one column op: d=direct, f=5-complement, t=10-complement (carry/borrow) */
+/* classify one column step: d=direct, f=5-complement, t=10-complement (carry/borrow) */
 function colOp(x,a,sub){
   const e=x%5;
   if(!sub){
@@ -285,7 +287,7 @@ function genSum(type,d,rows){
       for(let a=0;a<80&&!placed;a++){
         const n=lo+Math.floor(Math.random()*(hi-lo+1));
         const sub=i>0&&Math.random()<.5;
-        if(sub&&n>tot)continue;
+        if(sub&&n>tot)continue; // never negative
         const len=String(tot+n).length+1,X=pad(tot,len),A=pad(n,len),ks=new Set();
         for(let j=0;j<len;j++)if(A[j]!==0)ks.add(colOp(X[j],A[j],sub));
         if(type==='none'&&(ks.has('f')||ks.has('t')))continue;
@@ -315,91 +317,32 @@ function generate(){
   say($('pMsg'),sheetData.length<cnt?'Only '+sheetData.length+' unique sums possible / কম হিসাব তৈরি হয়েছে':'',false);
 }
 function renderSheet(){
-  $('shSec').hidden=false;$('score').textContent='';
+  $('shSec').hidden=false;$('hint').hidden=true;$('score').textContent='';
   $('sheet').innerHTML=sheetData.map((g,i)=>`<div class="sum" id="s${i}"><div class="qno">#${i+1}</div>`+
     g.rows.map((r,j)=>`<div class="n"><span>${j?(r.s>0?'+':'−'):''}</span><span>${r.n}</span></div>`).join('')+
     `<hr><input type="text" inputmode="numeric" aria-label="Answer ${i+1}" id="a${i}"><div class="mk" id="m${i}"></div></div>`).join('');
 }
-function checkAll(){
+function checkAll(){ // recomputed from scratch each press, so no double counting
   let good=0;
   sheetData.forEach((g,i)=>{
-    const v=$('a'+i).value.trim(),card=$('s'+i),m=$('m'+i);
-    const ok=/^\d+$/.test(v)&&Number(v)===g.ans;
+    const v=$('a'+i).value.trim(),ok=/^\d+$/.test(v)&&Number(v)===g.ans;
     if(ok)good++;
-    card.className='sum '+(ok?'good':'bad');
-    m.innerHTML=ok?'<span class="ok">✔ Correct</span>':`<span class="err">✘ Answer: ${g.ans}</span>`;
+    $('s'+i).className='sum '+(ok?'good':'bad');
+    $('m'+i).innerHTML=ok?'<span class="ok">✔ Correct</span>':`<span class="err">✘ Answer: ${g.ans}</span>`;
   });
   $('score').className='msg ok';$('score').textContent=`Score / স্কোর: ${good}/${sheetData.length}`;
 }
 function tryAgain(){sheetData.forEach((g,i)=>{$('a'+i).value='';$('s'+i).className='sum';$('m'+i).textContent=''});$('score').textContent=''}
 ['pType','pDig','pRows'].forEach((id,i,a)=>$(id).addEventListener('change',()=>{
-  if(i<2){const nx=$(a[i+1]);nx.disabled=!$(id).value;if(!$(id).value){nx.value='';$('pCnt').disabled=true}}
+  if(i<2){const nx=$(a[i+1]);nx.disabled=!$(id).value;if(!$(id).value){nx.value='';$('pRows').disabled=true}}
   const ready=$('pType').value&&$('pDig').value&&$('pRows').value;
   $('pCnt').disabled=!ready;$('bGen').disabled=!ready;
 }));
 $('bGen').onclick=generate;$('bNew').onclick=()=>{if(sheetCfg)generate()};
 $('bChk').onclick=checkAll;$('bTry').onclick=tryAgain;$('bPrint').onclick=()=>print();
 
-/* ================= WORKSHEET IMAGES (IndexedDB, local only) ================= */
-let db=null,imgs=[],cur=-1,rot=0,sc=1,ox=0,oy=0;
-const openDB=()=>new Promise((res,rej)=>{
-  const q=indexedDB.open(DB_NAME,1);
-  q.onupgradeneeded=()=>q.result.createObjectStore(DB_STORE,{keyPath:'id',autoIncrement:true});
-  q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error);
-});
-const tx=(mode,fn)=>new Promise((res,rej)=>{const t=db.transaction(DB_STORE,mode),r=fn(t.objectStore(DB_STORE));t.oncomplete=()=>res(r.result);t.onerror=()=>rej(t.error)});
-async function loadImgs(){
-  imgs.forEach(i=>URL.revokeObjectURL(i.url));
-  const rows=db?await tx('readonly',s=>s.getAll()):[];
-  imgs=rows.map(r=>({id:r.id,url:URL.createObjectURL(r.blob)}));
-  $('thumbs').innerHTML=imgs.map((m,i)=>`<img src="${m.url}" data-i="${i}" alt="Worksheet ${i+1}" tabindex="0" class="${i===cur?'cur':''}">`).join('');
-}
-$('bAdd').onclick=()=>$('fIn').click();
-$('fIn').onchange=async e=>{
-  const files=[...e.target.files].filter(f=>f.type.startsWith('image/'));
-  if(db)for(const f of files)await tx('readwrite',s=>s.add({blob:f}));
-  else imgs.push(...files.map(f=>({id:null,url:URL.createObjectURL(f)})));
-  e.target.value='';await loadImgsSafe();
-};
-const loadImgsSafe=()=>db?loadImgs():Promise.resolve($('thumbs').innerHTML=imgs.map((m,i)=>`<img src="${m.url}" data-i="${i}" alt="Worksheet ${i+1}" tabindex="0">`).join(''));
-function show(i){
-  if(!imgs.length){$('viewer').hidden=true;cur=-1;return}
-  cur=(i+imgs.length)%imgs.length;rot=0;sc=1;ox=oy=0;
-  $('vi').src=imgs[cur].url;$('viewer').hidden=false;xf();
-  document.querySelectorAll('#thumbs img').forEach((t,k)=>t.classList.toggle('cur',k===cur));
-}
-const xf=()=>{$('vi').style.transform=`translate(-50%,-50%) translate(${ox}px,${oy}px) rotate(${rot}deg) scale(${sc})`};
-$('thumbs').addEventListener('click',e=>{const t=e.target.closest('img');if(t)show(+t.dataset.i)});
-$('thumbs').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.dataset.i)show(+e.target.dataset.i)});
-$('vP').onclick=()=>show(cur-1);$('vN').onclick=()=>show(cur+1);
-$('vZi').onclick=()=>{sc=Math.min(6,sc*1.25);xf()};$('vZo').onclick=()=>{sc=Math.max(.3,sc/1.25);xf()};
-$('vR').onclick=()=>{rot=(rot+90)%360;xf()};
-$('vC').onclick=()=>{$('viewer').hidden=true;cur=-1;document.querySelectorAll('#thumbs img.cur').forEach(t=>t.classList.remove('cur'))};
-$('vF').onclick=()=>{const v=$('vimg');(document.fullscreenElement?document.exitFullscreen():v.requestFullscreen&&v.requestFullscreen())};
-$('vD').onclick=async()=>{
-  if(cur<0||!confirm('Delete this image? / ছবিটি মুছবেন?'))return;
-  const m=imgs[cur];
-  if(db&&m.id!=null)await tx('readwrite',s=>s.delete(m.id));else{URL.revokeObjectURL(m.url);imgs.splice(cur,1)}
-  const keep=cur;await loadImgsSafe();show(Math.min(keep,imgs.length-1));
-};
-/* pan + pinch + wheel */
-const ptrs=new Map();let d0=0,s0=1;
-const vimg=$('vimg');
-vimg.addEventListener('pointerdown',e=>{vimg.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,[e.clientX,e.clientY]);if(ptrs.size===2){const [a,b]=[...ptrs.values()];d0=Math.hypot(a[0]-b[0],a[1]-b[1]);s0=sc}});
-vimg.addEventListener('pointermove',e=>{
-  if(!ptrs.has(e.pointerId))return;const p=ptrs.get(e.pointerId);
-  if(ptrs.size===1){ox+=e.clientX-p[0];oy+=e.clientY-p[1]}
-  ptrs.set(e.pointerId,[e.clientX,e.clientY]);
-  if(ptrs.size===2){const [a,b]=[...ptrs.values()];sc=Math.max(.3,Math.min(6,s0*Math.hypot(a[0]-b[0],a[1]-b[1])/d0))}
-  xf();
-});
-['pointerup','pointercancel'].forEach(t=>vimg.addEventListener(t,e=>ptrs.delete(e.pointerId)));
-vimg.addEventListener('wheel',e=>{e.preventDefault();sc=Math.max(.3,Math.min(6,sc*(e.deltaY<0?1.1:.9)));xf()},{passive:false});
-addEventListener('pagehide',()=>imgs.forEach(i=>URL.revokeObjectURL(i.url)));
-
 /* ================= INIT ================= */
-setN(autoN());
-openDB().then(d=>{db=d;return loadImgs()}).catch(()=>{db=null});
+setN(autoN());setZoom(defZoom());
 </script>
 </body>
 </html>
