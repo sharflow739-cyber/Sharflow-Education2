@@ -70,7 +70,9 @@ select,input[type=text]{min-height:36px;border:2px solid var(--ink);border-radiu
   .practice{margin-bottom:8px}
   #sheet{overflow:visible;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));margin-bottom:8px}
   #shSec>.row{margin-bottom:8px}
-  .right{margin-top:10px;padding-bottom:24px}
+  /* abacus stays pinned at the bottom; only the sums scroll above it */
+  .right{position:fixed;left:0;right:0;bottom:0;z-index:30;margin:0;background:#faf7f2;padding:6px 10px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 12px rgba(0,0,0,.2)}
+  .page{padding-bottom:calc(var(--abh,300px) + 12px)}
 }
 /* worksheet */
 #shSec{flex:1;min-height:0;display:flex;flex-direction:column;gap:6px}
@@ -145,7 +147,7 @@ select,input[type=text]{min-height:36px;border:2px solid var(--ink);border-radiu
 <script>
 /* ================= CONSTANTS ================= */
 const H_OFF=4,H_ON=42,E_ON=[78,98,118,138],E_OFF=[168,188,208,228];
-const MOBILE_BP=768,MOBILE_ZOOM=.74;
+const MOBILE_BP=768,MOBILE_ZOOM=.68;
 const $=id=>document.getElementById(id);
 
 /* ================= STATE ================= */
@@ -359,6 +361,8 @@ $('bChk').onclick=checkAll;$('bTry').onclick=tryAgain;$('bPrint').onclick=()=>pr
 
 /* ================= INIT ================= */
 setN(autoN());setZoom(defZoom());
+const rightEl=document.querySelector('.right');
+if(window.ResizeObserver)new ResizeObserver(()=>document.documentElement.style.setProperty('--abh',rightEl.offsetHeight+'px')).observe(rightEl);
 </script>
 </body>
 </html>
