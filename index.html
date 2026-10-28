@@ -1,6 +1,25 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
+<style>html{visibility:hidden}</style>
+<script>
+(function () {
+  var REF = 'evjiimnhxxxwxglewdzk';          // Supabase project ref
+  var h = location.hostname;
+  // সরাসরি vercel.app লিংকে এলে মূল সাইটের ভেতর দিয়ে পাঠাও
+  if (h !== 'sharflowbd.com' && h !== 'www.sharflowbd.com') {
+    location.replace('https://sharflowbd.com/abacus');
+    return;
+  }
+  var ok = false;
+  try {
+    var s = JSON.parse(localStorage.getItem('sb-' + REF + '-auth-token') || 'null');
+    ok = !!(s && s.access_token && s.expires_at && s.expires_at * 1000 > Date.now());
+  } catch (e) {}
+  if (!ok) { location.replace('/?login=1'); return; }
+  document.documentElement.style.visibility = 'visible';
+})();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sharflow Education — Abacus</title>
@@ -366,22 +385,3 @@ if(window.ResizeObserver)new ResizeObserver(()=>document.documentElement.style.s
 </script>
 </body>
 </html>
-<style>html{visibility:hidden}</style>
-<script>
-(function () {
-  var REF = 'evjiimnhxxxwxglewdzk';          // Supabase project ref
-  var h = location.hostname;
-  // সরাসরি vercel.app লিংকে এলে মূল সাইটের ভেতর দিয়ে পাঠাও
-  if (h !== 'sharflowbd.com' && h !== 'www.sharflowbd.com') {
-    location.replace('https://sharflowbd.com/abacus');
-    return;
-  }
-  var ok = false;
-  try {
-    var s = JSON.parse(localStorage.getItem('sb-' + REF + '-auth-token') || 'null');
-    ok = !!(s && s.access_token && s.expires_at && s.expires_at * 1000 > Date.now());
-  } catch (e) {}
-  if (!ok) { location.replace('/?login=1'); return; }
-  document.documentElement.style.visibility = 'visible';
-})();
-</script>
