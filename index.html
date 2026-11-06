@@ -129,7 +129,8 @@ select,input[type=text]{min-height:36px;border:2px solid var(--ink);border-radiu
           <select id="pType" aria-label="Practice type"><option value="">1. Type / ধরন</option><option value="none">Without Complement</option><option value="five">5 Complement</option><option value="ten">10 Complement</option><option value="mix">Mix Complement</option></select>
           <select id="pDig" aria-label="Digits" disabled><option value="">2. Digits / অঙ্ক</option><option>1</option><option>2</option><option>3</option><option>4</option></select>
           <select id="pRows" aria-label="Rows" disabled><option value="">3. Rows / সারি</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>8</option><option>10</option></select>
-          <select id="pCnt" aria-label="Sums" disabled><option value="10">4. Sums / হিসাব</option><option>5</option><option>10</option><option>15</option><option>20</option></select>
+          <select id="pOp" aria-label="Operation"><option value="mix">+ − Mixed / মিশ্র</option><option value="add">+ Only Addition / শুধু যোগ</option><option value="sub">− Only Subtraction / শুধু বিয়োগ</option></select>
+          <select id="pCnt" aria-label="Sums" disabled><option value="10">4. Sums / হিসাব (10)</option><option>4</option><option>5</option><option>10</option><option>15</option><option>20</option></select>
           <button id="bGen" disabled>Generate / তৈরি করুন</button>
         </div>
         <div class="msg" id="pMsg" role="status"></div>
@@ -315,15 +316,16 @@ function colOp(x,a,sub){
   return(a<5?e>=a:(x>=5&&e>=a-5))?'d':'f';
 }
 const pad=(n,l)=>String(n).padStart(l,'0').split('').map(Number);
-function genSum(type,d,rows){
+function genSum(type,d,rows,op){
+  op=op||'mix';
   const lo=d===1?1:10**(d-1),hi=10**d-1;let last=null;
   for(let t=0;t<400;t++){
     let tot=0,list=[],kinds=new Set(),ok=true;
     for(let i=0;i<rows&&ok;i++){
       let placed=false;
       for(let a=0;a<80&&!placed;a++){
-        const n=lo+Math.floor(Math.random()*(hi-lo+1));
-        const sub=i>0&&Math.random()<.5;
+        const n=(op==='sub'&&i===0)?Math.max(lo,Math.floor(hi*.6))+Math.floor(Math.random()*(hi-Math.max(lo,Math.floor(hi*.6))+1)):lo+Math.floor(Math.random()*(hi-lo+1));
+        const sub=i>0&&(op==='sub'||(op==='mix'&&Math.random()<.5));
         if(sub&&n>tot)continue; // never negative
         const len=String(tot+n).length+1,X=pad(tot,len),A=pad(n,len),ks=new Set();
         for(let j=0;j<len;j++)if(A[j]!==0)ks.add(colOp(X[j],A[j],sub));
@@ -334,24 +336,23 @@ function genSum(type,d,rows){
       if(!placed)ok=false;
     }
     if(!ok)continue;
-    last={rows:list,ans:tot};
     if(type==='five'&&!kinds.has('f'))continue;
     if(type==='ten'&&!kinds.has('t'))continue;
-    if(type==='mix'&&rows>2&&!(kinds.has('f')||kinds.has('t')))continue;
-    return last;
+    if(type==='mix'&&!(kinds.has('f')||kinds.has('t')))continue;
+    return {rows:list,ans:tot};
   }
-  return last;
+  return null;
 }
 function generate(){
-  const type=$('pType').value,d=+$('pDig').value,rows=+$('pRows').value,cnt=+$('pCnt').value||10;
-  sheetCfg={type,d,rows,cnt};sheetData=[];const seen=new Set();
+  const type=$('pType').value,d=+$('pDig').value,rows=+$('pRows').value,cnt=+$('pCnt').value||10,op=$('pOp').value||'mix';
+  sheetCfg={type,d,rows,cnt,op};sheetData=[];const seen=new Set();
   for(let i=0;i<cnt;i++){
     let g=null;
-    for(let t=0;t<60;t++){g=genSum(type,d,rows);if(!g)continue;const k=g.rows.map(r=>r.s*r.n).join(',');if(!seen.has(k)){seen.add(k);break}}
+    for(let t=0;t<60;t++){g=genSum(type,d,rows,op);if(!g)continue;const k=g.rows.map(r=>r.s*r.n).join(',');if(!seen.has(k)){seen.add(k);break}}
     if(g)sheetData.push(g);
   }
   renderSheet();
-  say($('pMsg'),sheetData.length<cnt?'Only '+sheetData.length+' unique sums possible / কম হিসাব তৈরি হয়েছে':'',false);
+  say($('pMsg'),sheetData.length===0?'এই সংমিশ্রণে হিসাব বানানো সম্ভব নয়। সারি বা অঙ্ক কমিয়ে দেখুন। / Not possible, reduce rows or digits':(sheetData.length<cnt?'Only '+sheetData.length+' unique sums possible / কম হিসাব তৈরি হয়েছে':''),false);
 }
 function renderSheet(){
   $('shSec').hidden=false;$('hint').hidden=true;$('score').textContent='';
